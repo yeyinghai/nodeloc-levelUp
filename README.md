@@ -1,30 +1,15 @@
-# NodeLoc 自动升级脚本 v4.0
+# NodeLoc 自动升级脚本 
 
 > 支持 **青龙面板** 和 **GitHub Actions** 双平台。
 
 ## 📁 文件结构
 
 ```
-├── nodeloc_upgrade_selenium.py   # 主脚本（v4.0 混合 API + Selenium）
+├── nodeloc_upgrade_selenium.py   # 主脚本（混合 API + Selenium）
 ├── .github/workflows/nodeloc.yml # GitHub Actions 工作流
 └── README.md
 ```
 
----
-
-## 🔍 v4.0 优化内容（基于对网站的实际分析）
-
-| 功能 | v3.x | v4.0 |
-|------|------|------|
-| 签到 | Selenium 点击 | Selenium 点击（nonce 由前端 JS 生成，必须保留）|
-| 浏览话题 | Selenium 逐页滚动 | `GET /latest.json` 纯 API |
-| 标记已读 | 等待页面滚动 | `POST /topics/timings` 纯 API |
-| 点赞 | Selenium 查找按钮 | `POST /post_actions` 标准 Discourse API |
-| 回复 | Selenium 填写编辑器 | `POST /posts` 标准 Discourse API |
-| 话题 URL | `/t/slug/id`（slug 获取有误） | `/t/{id}`（正确格式）|
-| 签到检测 | 检查 title 文字 | 检查 `class=checked-in`（更准确）|
-| 速度 | 慢（全靠浏览器等待）| **快 5~10 倍**（API 直接调用）|
-| 资源 | Chrome 全程运行 | **Chrome 仅签到时启动，完成后立即关闭** |
 
 ---
 
@@ -91,6 +76,21 @@ apt-get update && apt-get install -y chromium chromium-driver
 定时任务命令：`task /ql/data/scripts/nodeloc_upgrade_selenium.py`  
 定时规则：`0 9,21 * * *`
 
----
+## 运行结果展示
 
-**作者**：djkyc ｜ **版本**：4.0.0 ｜ 仅供技术学习交流
+#### 1、签到和点赞
+
+![360截图20260312231749174](https://github.com/user-attachments/assets/88f85363-2a6a-411d-bd16-9e6889f5f590)
+
+#### 2、话题回复
+
+![360截图20260312231823509](https://github.com/user-attachments/assets/6c944f21-7b99-4bc8-b6cb-4bc1c0fee84a)
+
+#### 3、任务完成统计
+
+![360截图20260312231856053](https://github.com/user-attachments/assets/bc2158e1-d25e-484c-bb5e-918285ced8bb)
+
+---
+脚本是从djkyc的脚本升级更新而来，原脚本仓库地址：[djky/cnodeloc](https://github.com/djkyc/nodeloc)
+
+感谢大神的开源精神！！
