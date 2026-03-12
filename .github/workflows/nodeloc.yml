@@ -1,0 +1,95 @@
+name: NodeLoc 自动升级
+
+on:
+  # ── 定时触发：北京时间 09:00 和 21:00（UTC 01:00 / 13:00）──
+  schedule:
+    - cron: "0 1 * * *"   # 北京时间 09:00
+    - cron: "0 13 * * *"  # 北京时间 21:00
+
+  # ── 允许在 GitHub 页面手动触发 ──
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: "开启 Debug 模式（上传调试截图）"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+# 同一时间只允许一个 Job 运行，避免并发冲突
+concurrency:
+  group: nodeloc-upgrade
+  cancel-in-progress: false
+
+jobs:
+  upgrade:
+    name: 执行 NodeLoc 升级任务
+    runs-on: ubuntu-latest
+    timeout-minutes: 60   # 最长运行 60 分钟，防止 hung job
+
+    steps:
+      # ── 1. 检出代码 ──
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      # ── 2. 安装 Python ──
+      - name: 配置 Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # ── 3. 安装 Chrome 与 ChromeDriver（版本自动匹配）──
+      - name: 安装 Chrome & ChromeDriver
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable   # 始终使用最新稳定版
+        id: setup-chrome
+
+      # ── 4. 安装 Python 依赖 ──
+      - name: 安装 Python 依赖
+        run: |
+          pip install --upgrade pip
+          pip install loguru curl-cffi selenium
+
+      # ── 5. 运行升级脚本 ──
+      - name: 运行 NodeLoc 升级脚本
+        env:
+          # -------- 必填：在 GitHub → Settings → Secrets 中配置 --------
+          NODELOC_USERNAME: ${{ secrets.NODELOC_USERNAME }}
+          NODELOC_PASSWORD: ${{ secrets.NODELOC_PASSWORD }}
+
+          # -------- 可选通知（不填则跳过）--------
+          TG_BOT_TOKEN:     ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID:       ${{ secrets.TG_CHAT_ID }}
+          GOTIFY_URL:       ${{ secrets.GOTIFY_URL }}
+          GOTIFY_TOKEN:     ${{ secrets.GOTIFY_TOKEN }}
+          SC3_PUSH_KEY:     ${{ secrets.SC3_PUSH_KEY }}
+          WECHAT_API_URL:   ${{ secrets.WECHAT_API_URL }}
+          WECHAT_AUTH_TOKEN: ${{ secrets.WECHAT_AUTH_TOKEN }}
+
+          # -------- 可选代理 --------
+          NODELOC_PROXY:    ${{ secrets.NODELOC_PROXY }}
+
+          # -------- setup-chrome 输出的路径 --------
+          CHROME_PATH:      ${{ steps.setup-chrome.outputs.chrome-path }}
+          CHROMEDRIVER_PATH: ${{ steps.setup-chrome.outputs.chromedriver-path }}
+
+          # -------- Debug 开关 --------
+          NODELOC_DEBUG:    ${{ github.event.inputs.debug || 'false' }}
+
+        run: python nodeloc_upgrade_selenium.py
+
+      # ── 6. 上传调试文件（仅 Debug 模式或脚本失败时）──
+      - name: 上传调试截图
+        if: ${{ failure() || github.event.inputs.debug == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: nodeloc-debug-${{ github.run_number }}
+          path: |
+            debug/nodeloc_upgrade_debug.html
+            debug/nodeloc_upgrade_debug.png
+          if-no-files-found: ignore
+          retention-days: 7   # 保留 7 天后自动删除
