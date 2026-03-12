@@ -18,6 +18,10 @@ on:
           - "false"
           - "true"
 
+# 强制使用 Node.js 24 运行 Actions，消除 Node.js 20 废弃警告
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 # 同一时间只允许一个 Job 运行，避免并发冲突
 concurrency:
   group: nodeloc-upgrade
@@ -34,51 +38,50 @@ jobs:
       - name: 检出仓库
         uses: actions/checkout@v4
 
-      # ── 2. 安装 Python ──
+      # ── 2. 安装 Python（cache 依赖 requirements.txt）──
       - name: 配置 Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
+          cache-dependency-path: "requirements.txt"
 
       # ── 3. 安装 Chrome 与 ChromeDriver（版本自动匹配）──
       - name: 安装 Chrome & ChromeDriver
         uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable   # 始终使用最新稳定版
         id: setup-chrome
+        with:
+          chrome-version: stable
 
       # ── 4. 安装 Python 依赖 ──
       - name: 安装 Python 依赖
-        run: |
-          pip install --upgrade pip
-          pip install loguru curl-cffi selenium
+        run: pip install -r requirements.txt
 
       # ── 5. 运行升级脚本 ──
       - name: 运行 NodeLoc 升级脚本
         env:
           # -------- 必填：在 GitHub → Settings → Secrets 中配置 --------
-          NODELOC_USERNAME: ${{ secrets.NODELOC_USERNAME }}
-          NODELOC_PASSWORD: ${{ secrets.NODELOC_PASSWORD }}
+          NODELOC_USERNAME:  ${{ secrets.NODELOC_USERNAME }}
+          NODELOC_PASSWORD:  ${{ secrets.NODELOC_PASSWORD }}
 
           # -------- 可选通知（不填则跳过）--------
-          TG_BOT_TOKEN:     ${{ secrets.TG_BOT_TOKEN }}
-          TG_CHAT_ID:       ${{ secrets.TG_CHAT_ID }}
-          GOTIFY_URL:       ${{ secrets.GOTIFY_URL }}
-          GOTIFY_TOKEN:     ${{ secrets.GOTIFY_TOKEN }}
-          SC3_PUSH_KEY:     ${{ secrets.SC3_PUSH_KEY }}
-          WECHAT_API_URL:   ${{ secrets.WECHAT_API_URL }}
+          TG_BOT_TOKEN:      ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID:        ${{ secrets.TG_CHAT_ID }}
+          GOTIFY_URL:        ${{ secrets.GOTIFY_URL }}
+          GOTIFY_TOKEN:      ${{ secrets.GOTIFY_TOKEN }}
+          SC3_PUSH_KEY:      ${{ secrets.SC3_PUSH_KEY }}
+          WECHAT_API_URL:    ${{ secrets.WECHAT_API_URL }}
           WECHAT_AUTH_TOKEN: ${{ secrets.WECHAT_AUTH_TOKEN }}
 
           # -------- 可选代理 --------
-          NODELOC_PROXY:    ${{ secrets.NODELOC_PROXY }}
+          NODELOC_PROXY:     ${{ secrets.NODELOC_PROXY }}
 
           # -------- setup-chrome 输出的路径 --------
-          CHROME_PATH:      ${{ steps.setup-chrome.outputs.chrome-path }}
+          CHROME_PATH:       ${{ steps.setup-chrome.outputs.chrome-path }}
           CHROMEDRIVER_PATH: ${{ steps.setup-chrome.outputs.chromedriver-path }}
 
           # -------- Debug 开关 --------
-          NODELOC_DEBUG:    ${{ github.event.inputs.debug || 'false' }}
+          NODELOC_DEBUG:     ${{ github.event.inputs.debug || 'false' }}
 
         run: python nodeloc_upgrade_selenium.py
 
@@ -92,4 +95,4 @@ jobs:
             debug/nodeloc_upgrade_debug.html
             debug/nodeloc_upgrade_debug.png
           if-no-files-found: ignore
-          retention-days: 7   # 保留 7 天后自动删除
+          retention-days: 7
