@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 NodeLoc 自动升级脚本 - 混合版（API + Selenium 签到）
-版本: 4.0.0
 
 优化策略（基于对 www.nodeloc.com 的实际分析）：
   - 签到：Selenium 点击（需要前端 JS 生成 nonce，无法绕过）
@@ -19,7 +18,6 @@ NodeLoc 自动升级脚本 - 混合版（API + Selenium 签到）
   ✅ 签到状态检测（class=checked-in 或 title 包含"已经签到"）
 
 适配：青龙面板 ARM Docker + GitHub Actions Ubuntu
-作者: djkyc  版本: 4.0.0
 """
 
 import os
