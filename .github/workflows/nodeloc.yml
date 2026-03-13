@@ -73,6 +73,10 @@ jobs:
           WECHAT_API_URL:    ${{ secrets.WECHAT_API_URL }}
           WECHAT_AUTH_TOKEN: ${{ secrets.WECHAT_AUTH_TOKEN }}
 
+          # -------- Bark 通知（iOS）--------
+          BARK_URL:          ${{ secrets.BARK_URL }}
+          BARK_SOUND:        ${{ secrets.BARK_SOUND }}
+
           # -------- 可选代理 --------
           NODELOC_PROXY:     ${{ secrets.NODELOC_PROXY }}
 
