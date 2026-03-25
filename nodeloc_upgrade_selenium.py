@@ -79,7 +79,7 @@ if NODELOC_PROXY:
 DAILY_TASKS = {
     "topics_to_browse": int(os.environ.get("NL_TOPICS",  "30")),
     "likes_to_give":    int(os.environ.get("NL_LIKES",   "15")),
-    "replies_to_post":  int(os.environ.get("NL_REPLIES", "5")),
+    "replies_to_post":  int(os.environ.get("NL_REPLIES", "2")),
 }
 
 REPLY_TEMPLATES = [
