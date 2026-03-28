@@ -77,23 +77,22 @@ if NODELOC_PROXY:
 
 # ── 任务配置（可通过环境变量覆盖）───────────────────────────────────
 DAILY_TASKS = {
-    "topics_to_browse": int(os.environ.get("NL_TOPICS",  "30")),
-    "likes_to_give":    int(os.environ.get("NL_LIKES",   "15")),
+    "topics_to_browse": int(os.environ.get("NL_TOPICS",  "15")),
+    "likes_to_give":    int(os.environ.get("NL_LIKES",   "8")),
     "replies_to_post":  int(os.environ.get("NL_REPLIES", "2")),
 }
 
 REPLY_TEMPLATES = [
-    "感谢分享！给力",
-    "学习了，很有帮助",
-    "支持一下，值得学习",
+    "mark一下，下次再看",
+    "感谢楼主",
+    "看看到底是什么",
     "不错的内容，Mark",
     "mark一下，下次再看",
     "收藏了，666",
     "有用的信息",
     "感谢楼主",
-    "不错值得学习。。。",
     "谢谢。加油,看好你。",
-    "已查阅感谢分享。",
+    "感谢分享。",
 ]
 
 CHROME_CANDIDATES = [
